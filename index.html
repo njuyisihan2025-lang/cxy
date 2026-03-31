@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>中国各省储能项目 IRR 与招投标数量分布</title>
+    <style>
+      :root {
+        color-scheme: light;
+      }
+      body {
+        margin: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC",
+          "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+        background: #f6f8fb;
+        color: #1f2937;
+      }
+      .container {
+        max-width: 1200px;
+        margin: 24px auto;
+        padding: 0 16px;
+      }
+      h1 {
+        margin: 0 0 8px;
+        font-size: 28px;
+      }
+      .subtitle {
+        margin: 0 0 16px;
+        color: #4b5563;
+      }
+      #chart {
+        width: 100%;
+        height: 78vh;
+        min-height: 560px;
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 6px 24px rgba(15, 23, 42, 0.08);
+      }
+      .note {
+        margin-top: 10px;
+        font-size: 12px;
+        color: #6b7280;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>中国各省储能项目 IRR 热力分布图</h1>
+      <p class="subtitle">
+        颜色越深代表 IRR 越高；鼠标悬浮可查看各省份 IRR 及储能项目招投标数量（示例数据，可替换为真实数据库）。
+      </p>
+      <div id="chart" aria-label="中国储能项目IRR地图图表"></div>
+      <p class="note">注：IRR 单位为 %；招投标数量单位为 个。</p>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5/map/js/china.js"></script>
+    <script>
+      const provinceData = [
+        { name: "北京市", irr: 9.4, tenders: 21 },
+        { name: "天津市", irr: 9.1, tenders: 16 },
+        { name: "上海市", irr: 10.2, tenders: 22 },
+        { name: "重庆市", irr: 10.6, tenders: 28 },
+        { name: "河北省", irr: 10.9, tenders: 63 },
+        { name: "河南省", irr: 11.1, tenders: 75 },
+        { name: "云南省", irr: 12.3, tenders: 41 },
+        { name: "辽宁省", irr: 9.9, tenders: 38 },
+        { name: "黑龙江省", irr: 9.5, tenders: 32 },
+        { name: "湖南省", irr: 11.7, tenders: 58 },
+        { name: "安徽省", irr: 11.5, tenders: 52 },
+        { name: "山东省", irr: 11.2, tenders: 90 },
+        { name: "新疆维吾尔自治区", irr: 13.2, tenders: 67 },
+        { name: "江苏省", irr: 10.8, tenders: 88 },
+        { name: "浙江省", irr: 10.7, tenders: 69 },
+        { name: "江西省", irr: 11.4, tenders: 47 },
+        { name: "湖北省", irr: 11.3, tenders: 56 },
+        { name: "广西壮族自治区", irr: 11.9, tenders: 44 },
+        { name: "甘肃省", irr: 12.8, tenders: 53 },
+        { name: "山西省", irr: 12.1, tenders: 61 },
+        { name: "内蒙古自治区", irr: 12.9, tenders: 70 },
+        { name: "陕西省", irr: 11.8, tenders: 49 },
+        { name: "吉林省", irr: 9.7, tenders: 27 },
+        { name: "福建省", irr: 10.4, tenders: 46 },
+        { name: "贵州省", irr: 12.0, tenders: 39 },
+        { name: "广东省", irr: 10.1, tenders: 112 },
+        { name: "青海省", irr: 13.5, tenders: 24 },
+        { name: "西藏自治区", irr: 13.8, tenders: 11 },
+        { name: "四川省", irr: 11.6, tenders: 73 },
+        { name: "宁夏回族自治区", irr: 13.1, tenders: 30 },
+        { name: "海南省", irr: 10.3, tenders: 19 },
+        { name: "台湾省", irr: 9.8, tenders: 8 },
+        { name: "香港特别行政区", irr: 8.9, tenders: 5 },
+        { name: "澳门特别行政区", irr: 8.7, tenders: 3 }
+      ];
+
+      const chart = echarts.init(document.getElementById("chart"));
+
+      const option = {
+        tooltip: {
+          trigger: "item",
+          formatter: (params) => {
+            const item = params.data;
+            if (!item) {
+              return `${params.name}<br/>暂无数据`;
+            }
+            return [
+              `<strong>${params.name}</strong>`,
+              `IRR：<strong>${item.irr.toFixed(1)}%</strong>`,
+              `招投标数量：<strong>${item.tenders} 个</strong>`
+            ].join("<br/>");
+          }
+        },
+        visualMap: {
+          min: 8,
+          max: 14,
+          text: ["IRR高", "IRR低"],
+          realtime: false,
+          calculable: true,
+          inRange: {
+            color: ["#e5f5f9", "#99d8c9", "#2ca25f", "#006d2c"]
+          },
+          left: 24,
+          bottom: 28
+        },
+        series: [
+          {
+            name: "储能项目IRR",
+            type: "map",
+            map: "china",
+            roam: true,
+            zoom: 1.15,
+            label: {
+              show: false,
+              color: "#0f172a"
+            },
+            emphasis: {
+              label: {
+                show: true,
+                color: "#111827"
+              },
+              itemStyle: {
+                areaColor: "#f59e0b"
+              }
+            },
+            data: provinceData.map((p) => ({
+              name: p.name,
+              value: p.irr,
+              irr: p.irr,
+              tenders: p.tenders
+            }))
+          }
+        ]
+      };
+
+      chart.setOption(option);
+      window.addEventListener("resize", () => chart.resize());
+    </script>
+  </body>
+</html>
