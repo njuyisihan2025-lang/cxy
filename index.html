@@ -5,9 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>中国各省储能项目 IRR 与招投标数量分布</title>
     <style>
-      :root {
-        color-scheme: light;
-      }
+      :root { color-scheme: light; }
       body {
         margin: 0;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC",
@@ -15,41 +13,60 @@
         background: #f6f8fb;
         color: #1f2937;
       }
-      .container {
-        max-width: 1200px;
-        margin: 24px auto;
-        padding: 0 16px;
-      }
-      h1 {
-        margin: 0 0 8px;
-        font-size: 28px;
-      }
-      .subtitle {
-        margin: 0 0 16px;
-        color: #4b5563;
+      .container { max-width: 1200px; margin: 24px auto; padding: 0 16px; }
+      h1 { margin: 0 0 8px; font-size: 28px; }
+      .subtitle { margin: 0 0 12px; color: #4b5563; }
+      .meta {
+        display: inline-block;
+        margin-bottom: 16px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        background: #eef2ff;
+        color: #3730a3;
       }
       #chart {
         width: 100%;
-        height: 78vh;
-        min-height: 560px;
+        height: 74vh;
+        min-height: 520px;
         background: #fff;
         border-radius: 12px;
         box-shadow: 0 6px 24px rgba(15, 23, 42, 0.08);
       }
-      .note {
-        margin-top: 10px;
-        font-size: 12px;
-        color: #6b7280;
+      .table-wrap {
+        margin-top: 16px;
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 6px 24px rgba(15, 23, 42, 0.08);
+        overflow: hidden;
       }
+      table { width: 100%; border-collapse: collapse; }
+      th, td { padding: 10px 12px; border-bottom: 1px solid #e5e7eb; font-size: 14px; }
+      th { background: #f9fafb; text-align: left; }
+      .note { margin-top: 10px; font-size: 12px; color: #6b7280; }
     </style>
   </head>
   <body>
     <div class="container">
       <h1>中国各省储能项目 IRR 热力分布图</h1>
-      <p class="subtitle">
-        颜色越深代表 IRR 越高；鼠标悬浮可查看各省份 IRR 及储能项目招投标数量（示例数据，可替换为真实数据库）。
-      </p>
+      <p class="subtitle">颜色越深代表 IRR 越高；鼠标悬浮可查看各省份 IRR 及储能项目招投标数量（示例数据，可替换为真实数据库）。</p>
+      <span class="meta">数据口径：2026Q1（示例）</span>
       <div id="chart" aria-label="中国储能项目IRR地图图表"></div>
+
+      <div class="table-wrap">
+        <table aria-label="省份IRR与招投标数量明细表">
+          <thead>
+            <tr>
+              <th>排名（IRR）</th>
+              <th>省份</th>
+              <th>IRR（%）</th>
+              <th>招投标数量（个）</th>
+            </tr>
+          </thead>
+          <tbody id="dataTableBody"></tbody>
+        </table>
+      </div>
+
       <p class="note">注：IRR 单位为 %；招投标数量单位为 个。</p>
     </div>
 
@@ -94,15 +111,14 @@
       ];
 
       const chart = echarts.init(document.getElementById("chart"));
+      const tableBody = document.getElementById("dataTableBody");
 
       const option = {
         tooltip: {
           trigger: "item",
           formatter: (params) => {
             const item = params.data;
-            if (!item) {
-              return `${params.name}<br/>暂无数据`;
-            }
+            if (!item) return `${params.name}<br/>暂无数据`;
             return [
               `<strong>${params.name}</strong>`,
               `IRR：<strong>${item.irr.toFixed(1)}%</strong>`,
@@ -116,44 +132,36 @@
           text: ["IRR高", "IRR低"],
           realtime: false,
           calculable: true,
-          inRange: {
-            color: ["#e5f5f9", "#99d8c9", "#2ca25f", "#006d2c"]
-          },
+          inRange: { color: ["#e5f5f9", "#99d8c9", "#2ca25f", "#006d2c"] },
           left: 24,
           bottom: 28
         },
-        series: [
-          {
-            name: "储能项目IRR",
-            type: "map",
-            map: "china",
-            roam: true,
-            zoom: 1.15,
-            label: {
-              show: false,
-              color: "#0f172a"
-            },
-            emphasis: {
-              label: {
-                show: true,
-                color: "#111827"
-              },
-              itemStyle: {
-                areaColor: "#f59e0b"
-              }
-            },
-            data: provinceData.map((p) => ({
-              name: p.name,
-              value: p.irr,
-              irr: p.irr,
-              tenders: p.tenders
-            }))
-          }
-        ]
+        series: [{
+          name: "储能项目IRR",
+          type: "map",
+          map: "china",
+          roam: true,
+          zoom: 1.15,
+          label: { show: false, color: "#0f172a" },
+          emphasis: {
+            label: { show: true, color: "#111827" },
+            itemStyle: { areaColor: "#f59e0b" }
+          },
+          data: provinceData.map((p) => ({ name: p.name, value: p.irr, irr: p.irr, tenders: p.tenders }))
+        }]
       };
 
       chart.setOption(option);
       window.addEventListener("resize", () => chart.resize());
+
+      provinceData
+        .slice()
+        .sort((a, b) => b.irr - a.irr)
+        .forEach((item, idx) => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `<td>${idx + 1}</td><td>${item.name}</td><td>${item.irr.toFixed(1)}</td><td>${item.tenders}</td>`;
+          tableBody.appendChild(tr);
+        });
     </script>
   </body>
 </html>
