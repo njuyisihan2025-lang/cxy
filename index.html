@@ -1,167 +1,346 @@
 <!doctype html>
 <html lang="zh-CN">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>中国各省储能项目 IRR 与招投标数量分布</title>
-    <style>
-      :root { color-scheme: light; }
-      body {
-        margin: 0;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC",
-          "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
-        background: #f6f8fb;
-        color: #1f2937;
-      }
-      .container { max-width: 1200px; margin: 24px auto; padding: 0 16px; }
-      h1 { margin: 0 0 8px; font-size: 28px; }
-      .subtitle { margin: 0 0 12px; color: #4b5563; }
-      .meta {
-        display: inline-block;
-        margin-bottom: 16px;
-        padding: 6px 10px;
-        border-radius: 999px;
-        font-size: 12px;
-        background: #eef2ff;
-        color: #3730a3;
-      }
-      #chart {
-        width: 100%;
-        height: 74vh;
-        min-height: 520px;
-        background: #fff;
-        border-radius: 12px;
-        box-shadow: 0 6px 24px rgba(15, 23, 42, 0.08);
-      }
-      .table-wrap {
-        margin-top: 16px;
-        background: #fff;
-        border-radius: 12px;
-        box-shadow: 0 6px 24px rgba(15, 23, 42, 0.08);
-        overflow: hidden;
-      }
-      table { width: 100%; border-collapse: collapse; }
-      th, td { padding: 10px 12px; border-bottom: 1px solid #e5e7eb; font-size: 14px; }
-      th { background: #f9fafb; text-align: left; }
-      .note { margin-top: 10px; font-size: 12px; color: #6b7280; }
-    </style>
-  </head>
-  <body>
-    <div class="container">
-      <h1>中国各省储能项目 IRR 热力分布图</h1>
-      <p class="subtitle">颜色越深代表 IRR 越高；鼠标悬浮可查看各省份 IRR 及储能项目招投标数量（示例数据，可替换为真实数据库）。</p>
-      <span class="meta">数据口径：2026Q1（示例）</span>
-      <div id="chart" aria-label="中国储能项目IRR地图图表"></div>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>锂电储能行业分析台 Demo</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC",
+        "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+      background: #f8fafc;
+      color: #0f172a;
+    }
+    .app { display: flex; min-height: 100vh; }
+    .sidebar {
+      width: 260px; background: #fff; border-right: 1px solid #e2e8f0; padding: 20px;
+      position: sticky; top: 0; height: 100vh; overflow: auto;
+    }
+    .brand {
+      background: #0f172a; color: white; border-radius: 18px; padding: 16px; font-weight: 700;
+      margin-bottom: 20px;
+    }
+    .nav button {
+      width: 100%; text-align: left; border: 0; background: transparent; padding: 12px 14px;
+      border-radius: 14px; margin-bottom: 8px; cursor: pointer; font-size: 14px;
+    }
+    .nav button.active { background: #0f172a; color: white; }
+    .nav button:hover { background: #f1f5f9; }
+    .nav button.active:hover { background: #0f172a; }
+    .main { flex: 1; padding: 24px; }
+    .topbar {
+      background: white; border: 1px solid #e2e8f0; border-radius: 22px; padding: 20px 24px;
+      display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+    .title { font-size: 28px; font-weight: 800; margin: 0; }
+    .subtitle { color: #64748b; font-size: 14px; margin-top: 6px; }
+    .search { display: flex; gap: 10px; flex-wrap: wrap; }
+    input {
+      width: 280px; max-width: 100%; padding: 12px 14px; border-radius: 14px;
+      border: 1px solid #cbd5e1; font-size: 14px;
+    }
+    .btn {
+      border: 0; background: #0f172a; color: white; border-radius: 14px; padding: 12px 16px;
+      cursor: pointer; font-weight: 600;
+    }
+    .hero {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: white; border-radius: 24px; padding: 28px; margin-bottom: 24px;
+      display: grid; grid-template-columns: 1.4fr 1fr; gap: 18px;
+    }
+    .hero h2 { margin: 10px 0 12px; font-size: 34px; }
+    .hero p { color: #cbd5e1; line-height: 1.7; }
+    .hero-mini {
+      background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 18px; padding: 14px; margin-bottom: 10px;
+    }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+    .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .card {
+      background: white; border: 1px solid #e2e8f0; border-radius: 22px; padding: 18px;
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
+    }
+    .card h3 { margin: 0 0 10px; font-size: 18px; }
+    .kpi-value { font-size: 32px; font-weight: 800; margin: 8px 0 4px; }
+    .muted { color: #64748b; font-size: 13px; }
+    .section-title {
+      display: flex; justify-content: space-between; align-items: end; gap: 10px; margin: 8px 0 14px;
+    }
+    .section-title h2 { margin: 0; font-size: 22px; }
+    .section-title p { margin: 6px 0 0; color: #64748b; font-size: 14px; }
+    .tag {
+      display: inline-block; background: #f1f5f9; color: #334155; border-radius: 999px;
+      padding: 6px 10px; font-size: 12px; margin-right: 8px; margin-bottom: 8px;
+    }
+    .event {
+      background: white; border: 1px solid #e2e8f0; border-radius: 22px; padding: 18px; margin-bottom: 14px;
+    }
+    .event-title { font-size: 18px; font-weight: 700; margin: 8px 0; }
+    .event-summary { color: #475569; line-height: 1.7; }
+    .two-col { display: grid; grid-template-columns: 1.6fr 0.9fr; gap: 20px; }
+    .small-list > div {
+      border: 1px solid #e2e8f0; border-radius: 18px; padding: 14px; margin-bottom: 12px;
+      background: #fff;
+    }
+    .table { width: 100%; border-collapse: collapse; }
+    .table th, .table td { padding: 12px; border-bottom: 1px solid #e2e8f0; text-align: left; font-size: 14px; }
+    .table th { color: #64748b; font-weight: 600; background: #f8fafc; }
+    .hidden { display: none; }
+    .page { display: none; }
+    .page.active { display: block; }
+    .pill { background: #e2e8f0; color: #0f172a; border-radius: 999px; font-size: 12px; padding: 5px 10px; }
+    .note {
+      background: #0f172a; color: white; border-radius: 18px; padding: 16px; margin-top: 20px;
+    }
+    @media (max-width: 1100px) {
+      .hero, .two-col, .grid-4, .grid-3, .grid-2 { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+      .main { padding: 14px; }
+      input { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">锂电储能分析台<br><span style="font-size:12px;color:#cbd5e1;font-weight:400;">Single-file Demo</span></div>
+      <div class="nav">
+        <button class="active" data-page="home">首页总览</button>
+        <button data-page="chain">产业链图谱</button>
+        <button data-page="data">行业数据看板</button>
+        <button data-page="events">事件中心</button>
+        <button data-page="policy">政策与电力市场</button>
+        <button data-page="bids">项目与招投标</button>
+        <button data-page="company">公司研究</button>
+        <button data-page="output">研究输出</button>
+      </div>
+      <div class="note">
+        <div style="font-size:13px;color:#cbd5e1;">今日AI提示</div>
+        <div style="margin-top:8px;line-height:1.7;font-size:14px;">
+          优先看两条主线：工商业储能政策兑现，以及系统价格继续下探后的利润分化。
+        </div>
+      </div>
+    </aside>
 
-      <div class="table-wrap">
-        <table aria-label="省份IRR与招投标数量明细表">
-          <thead>
-            <tr>
-              <th>排名（IRR）</th>
-              <th>省份</th>
-              <th>IRR（%）</th>
-              <th>招投标数量（个）</th>
-            </tr>
-          </thead>
-          <tbody id="dataTableBody"></tbody>
-        </table>
+    <main class="main">
+      <div class="topbar">
+        <div>
+          <h1 class="title">锂电储能行业分析台｜演示版</h1>
+          <div class="subtitle">适合向领导或团队演示的网页原型，也可以继续扩展成正式产品</div>
+        </div>
+        <div class="search">
+          <input placeholder="搜索事件、公司、政策……" />
+          <button class="btn">生成行业日报</button>
+        </div>
       </div>
 
-      <p class="note">注：IRR 单位为 %；招投标数量单位为 个。</p>
-    </div>
+      <section id="home" class="page active">
+        <div class="hero">
+          <div>
+            <div class="pill">演示模式 Demo View</div>
+            <h2>锂电储能研究分析台</h2>
+            <p>围绕“行业跟踪 + 事件归因 + 公司映射 + 报告输出”的研究闭环设计。你可以把它当成一台面向券商研究员的研究驾驶舱。</p>
+            <div style="margin-top:16px;">
+              <button class="btn">进入事件分析</button>
+            </div>
+          </div>
+          <div>
+            <div class="hero-mini"><b>今日核心矛盾</b><br><span style="color:#cbd5e1;">国内价格承压 vs 海外高毛利订单支撑</span></div>
+            <div class="hero-mini"><b>AI今日建议</b><br><span style="color:#cbd5e1;">优先关注工商业储能政策兑现与招投标价格变化</span></div>
+            <div class="hero-mini"><b>建议跟踪公司</b><br><span style="color:#cbd5e1;">阳光电源 / 亿纬锂能 / 科华数据</span></div>
+          </div>
+        </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/echarts@5/map/js/china.js"></script>
-    <script>
-      const provinceData = [
-        { name: "北京市", irr: 9.4, tenders: 21 },
-        { name: "天津市", irr: 9.1, tenders: 16 },
-        { name: "上海市", irr: 10.2, tenders: 22 },
-        { name: "重庆市", irr: 10.6, tenders: 28 },
-        { name: "河北省", irr: 10.9, tenders: 63 },
-        { name: "河南省", irr: 11.1, tenders: 75 },
-        { name: "云南省", irr: 12.3, tenders: 41 },
-        { name: "辽宁省", irr: 9.9, tenders: 38 },
-        { name: "黑龙江省", irr: 9.5, tenders: 32 },
-        { name: "湖南省", irr: 11.7, tenders: 58 },
-        { name: "安徽省", irr: 11.5, tenders: 52 },
-        { name: "山东省", irr: 11.2, tenders: 90 },
-        { name: "新疆维吾尔自治区", irr: 13.2, tenders: 67 },
-        { name: "江苏省", irr: 10.8, tenders: 88 },
-        { name: "浙江省", irr: 10.7, tenders: 69 },
-        { name: "江西省", irr: 11.4, tenders: 47 },
-        { name: "湖北省", irr: 11.3, tenders: 56 },
-        { name: "广西壮族自治区", irr: 11.9, tenders: 44 },
-        { name: "甘肃省", irr: 12.8, tenders: 53 },
-        { name: "山西省", irr: 12.1, tenders: 61 },
-        { name: "内蒙古自治区", irr: 12.9, tenders: 70 },
-        { name: "陕西省", irr: 11.8, tenders: 49 },
-        { name: "吉林省", irr: 9.7, tenders: 27 },
-        { name: "福建省", irr: 10.4, tenders: 46 },
-        { name: "贵州省", irr: 12.0, tenders: 39 },
-        { name: "广东省", irr: 10.1, tenders: 112 },
-        { name: "青海省", irr: 13.5, tenders: 24 },
-        { name: "西藏自治区", irr: 13.8, tenders: 11 },
-        { name: "四川省", irr: 11.6, tenders: 73 },
-        { name: "宁夏回族自治区", irr: 13.1, tenders: 30 },
-        { name: "海南省", irr: 10.3, tenders: 19 },
-        { name: "台湾省", irr: 9.8, tenders: 8 },
-        { name: "香港特别行政区", irr: 8.9, tenders: 5 },
-        { name: "澳门特别行政区", irr: 8.7, tenders: 3 }
-      ];
+        <div class="section-title">
+          <div>
+            <h2>今日总览</h2>
+            <p>先看全局变化，再决定今天优先跟踪什么</p>
+          </div>
+        </div>
 
-      const chart = echarts.init(document.getElementById("chart"));
-      const tableBody = document.getElementById("dataTableBody");
+        <div class="grid-4">
+          <div class="card"><div class="muted">新增重点事件</div><div class="kpi-value">18</div><div class="muted">过去24小时自动聚合</div></div>
+          <div class="card"><div class="muted">储能招标规模</div><div class="kpi-value">9.0 GWh</div><div class="muted">近30日滚动</div></div>
+          <div class="card"><div class="muted">系统中标均价</div><div class="kpi-value">0.71</div><div class="muted">元/Wh，继续下探</div></div>
+          <div class="card"><div class="muted">重点公司公告</div><div class="kpi-value">7</div><div class="muted">储能链重点覆盖名单</div></div>
+        </div>
 
-      const option = {
-        tooltip: {
-          trigger: "item",
-          formatter: (params) => {
-            const item = params.data;
-            if (!item) return `${params.name}<br/>暂无数据`;
-            return [
-              `<strong>${params.name}</strong>`,
-              `IRR：<strong>${item.irr.toFixed(1)}%</strong>`,
-              `招投标数量：<strong>${item.tenders} 个</strong>`
-            ].join("<br/>");
-          }
-        },
-        visualMap: {
-          min: 8,
-          max: 14,
-          text: ["IRR高", "IRR低"],
-          realtime: false,
-          calculable: true,
-          inRange: { color: ["#e5f5f9", "#99d8c9", "#2ca25f", "#006d2c"] },
-          left: 24,
-          bottom: 28
-        },
-        series: [{
-          name: "储能项目IRR",
-          type: "map",
-          map: "china",
-          roam: true,
-          zoom: 1.15,
-          label: { show: false, color: "#0f172a" },
-          emphasis: {
-            label: { show: true, color: "#111827" },
-            itemStyle: { areaColor: "#f59e0b" }
-          },
-          data: provinceData.map((p) => ({ name: p.name, value: p.irr, irr: p.irr, tenders: p.tenders }))
-        }]
-      };
+        <div class="section-title" style="margin-top:22px;">
+          <div>
+            <h2>重点事件流</h2>
+            <p>把新闻流变成研究流</p>
+          </div>
+        </div>
 
-      chart.setOption(option);
-      window.addEventListener("resize", () => chart.resize());
+        <div class="event">
+          <div><span class="tag">政策</span><span class="tag">工商业储能 / 电力市场</span><span class="tag">高优先级</span></div>
+          <div class="event-title">某省独立储能容量补偿政策落地</div>
+          <div class="event-summary">AI判断：区域项目收益率改善，系统集成与运营环节受益更直接。</div>
+        </div>
+        <div class="event">
+          <div><span class="tag">价格</span><span class="tag">系统集成 / 电芯</span><span class="tag">高优先级</span></div>
+          <div class="event-title">3月国内储能系统中标均价继续下探</div>
+          <div class="event-summary">AI判断：价格压力仍在，但头部企业凭海外与渠道能力更具韧性。</div>
+        </div>
+      </section>
 
-      provinceData
-        .slice()
-        .sort((a, b) => b.irr - a.irr)
-        .forEach((item, idx) => {
-          const tr = document.createElement("tr");
-          tr.innerHTML = `<td>${idx + 1}</td><td>${item.name}</td><td>${item.irr.toFixed(1)}</td><td>${item.tenders}</td>`;
-          tableBody.appendChild(tr);
-        });
-    </script>
-  </body>
+      <section id="chain" class="page">
+        <div class="section-title">
+          <div>
+            <h2>产业链图谱</h2>
+            <p>把储能行业拆成可跟踪、可映射、可落公司的结构化图谱</p>
+          </div>
+        </div>
+        <div class="grid-3">
+          <div class="card"><h3>上游材料</h3><div class="muted">碳酸锂、正极、电解液、隔膜</div><div style="margin-top:12px;"><span class="tag">成本压力缓解</span></div></div>
+          <div class="card"><h3>储能电芯</h3><div class="muted">容量扩张与价格竞争并存</div><div style="margin-top:12px;"><span class="tag">供给扩张</span></div></div>
+          <div class="card"><h3>PCS / BMS</h3><div class="muted">海外认证与渠道能力更关键</div><div style="margin-top:12px;"><span class="tag">海外弹性强</span></div></div>
+          <div class="card"><h3>系统集成</h3><div class="muted">项目能力与成本控制决定份额</div><div style="margin-top:12px;"><span class="tag">集中度提升</span></div></div>
+          <div class="card"><h3>下游场景</h3><div class="muted">源网侧、工商业、户储、数据中心</div><div style="margin-top:12px;"><span class="tag">工商业活跃</span></div></div>
+        </div>
+      </section>
+
+      <section id="data" class="page">
+        <div class="section-title">
+          <div>
+            <h2>行业数据看板</h2>
+            <p>用数据验证逻辑，识别景气、价格和盈利拐点</p>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <h3>关键数据</h3>
+            <table class="table">
+              <tr><th>指标</th><th>最新值</th><th>变化</th></tr>
+              <tr><td>月度招标规模</td><td>9.0 GWh</td><td>+22%</td></tr>
+              <tr><td>系统中标均价</td><td>0.71 元/Wh</td><td>-2.8%</td></tr>
+              <tr><td>海外订单热度</td><td>2.9</td><td>持续上升</td></tr>
+              <tr><td>工商业经济性热度</td><td>80</td><td>边际改善</td></tr>
+            </table>
+          </div>
+          <div class="card">
+            <h3>AI数据解读</h3>
+            <div class="muted" style="line-height:1.8;font-size:14px;">
+              近6个月国内招标规模持续抬升，但系统价格同步回落，说明行业景气与价格竞争并存；海外订单热度走强，对高壁垒公司更有支撑。
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="events" class="page">
+        <div class="section-title">
+          <div>
+            <h2>事件中心</h2>
+            <p>把单条新闻、政策、项目自动转成可研究的影响分析</p>
+          </div>
+        </div>
+        <div class="two-col">
+          <div class="small-list">
+            <div><b>某省独立储能容量补偿政策落地</b><br><span class="muted">政策 / 工商业储能</span></div>
+            <div><b>3月国内储能系统中标均价继续下探</b><br><span class="muted">价格 / 系统集成</span></div>
+            <div><b>欧洲公用事业级储能项目签约提升</b><br><span class="muted">海外项目 / PCS</span></div>
+          </div>
+          <div class="card">
+            <h3>事件分析详情</h3>
+            <p class="muted" style="line-height:1.8;">
+              某省独立储能容量补偿政策落地，预计改善区域工商业储能项目回报率，提升投资积极性。
+            </p>
+            <div style="margin-top:16px;"><span class="tag">政策落地</span> → <span class="tag">项目收益率提升</span> → <span class="tag">工商业需求改善</span> → <span class="tag">系统集成 / PCS受益</span></div>
+            <div style="margin-top:16px;"><b>重点公司映射：</b> 阳光电源 / 科华数据 / 南网储能</div>
+          </div>
+        </div>
+      </section>
+
+      <section id="policy" class="page">
+        <div class="section-title">
+          <div>
+            <h2>政策与电力市场</h2>
+            <p>储能行业区别于一般制造业的关键变量：经济性与市场机制</p>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <h3>重点区域经济性面板</h3>
+            <table class="table">
+              <tr><th>地区</th><th>峰谷价差</th><th>结论</th></tr>
+              <tr><td>江苏</td><td>0.82元/kWh</td><td>工商业经济性改善</td></tr>
+              <tr><td>广东</td><td>0.76元/kWh</td><td>辅助服务活跃</td></tr>
+              <tr><td>浙江</td><td>0.74元/kWh</td><td>项目落地加速</td></tr>
+            </table>
+          </div>
+          <div class="card">
+            <h3>AI政策解读</h3>
+            <div class="muted" style="line-height:1.8;">
+              当前更值得关注的不是单纯政策数量，而是政策是否真正改善项目收益模型。江苏、浙江的工商业储能经济性更值得优先跟踪。
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="bids" class="page">
+        <div class="section-title">
+          <div>
+            <h2>项目与招投标</h2>
+            <p>最直接观察需求景气、价格竞争和份额变化的窗口</p>
+          </div>
+        </div>
+        <div class="card">
+          <table class="table">
+            <tr><th>项目名称</th><th>地区</th><th>规模</th><th>中标方</th><th>阶段</th></tr>
+            <tr><td>华东独立储能项目</td><td>江苏</td><td>400MWh</td><td>阳光电源</td><td>中标</td></tr>
+            <tr><td>沿海工商业储能集群</td><td>广东</td><td>180MWh</td><td>科华数据</td><td>开工</td></tr>
+            <tr><td>欧洲公用事业项目</td><td>德国</td><td>520MWh</td><td>阳光电源</td><td>签约</td></tr>
+          </table>
+        </div>
+      </section>
+
+      <section id="company" class="page">
+        <div class="section-title">
+          <div>
+            <h2>公司研究</h2>
+            <p>把行业变化落到个股，形成持续更新的研究主页</p>
+          </div>
+        </div>
+        <div class="grid-3">
+          <div class="card"><h3>阳光电源</h3><div class="muted">PCS / 系统集成</div><p>海外大储布局深、认证壁垒高、盈利韧性更强。</p></div>
+          <div class="card"><h3>亿纬锂能</h3><div class="muted">储能电芯</div><p>电芯能力强，需继续观察产能消化与海外订单兑现。</p></div>
+          <div class="card"><h3>科华数据</h3><div class="muted">PCS / 系统</div><p>电力电子能力突出，工商业及海外储能具备弹性。</p></div>
+        </div>
+      </section>
+
+      <section id="output" class="page">
+        <div class="section-title">
+          <div>
+            <h2>研究输出</h2>
+            <p>把分析结果快速转成日报、点评、周报和公司更新</p>
+          </div>
+        </div>
+        <div class="card">
+          <h3>AI生成结果预览</h3>
+          <p style="line-height:1.9;color:#334155;">
+            【储能行业日报】国内价格继续承压，区域政策催化工商业需求改善。<br><br>
+            核心结论：国内大储系统中标均价继续下探，行业竞争仍然激烈；但部分区域储能政策优化改善项目经济性，工商业储能景气度边际抬升，建议优先关注海外敞口更高及具备渠道和认证优势的公司。
+          </p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const buttons = document.querySelectorAll('.nav button');
+    const pages = document.querySelectorAll('.page');
+    buttons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        buttons.forEach(b => b.classList.remove('active'));
+        pages.forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(btn.dataset.page).classList.add('active');
+      });
+    });
+  </script>
+</body>
 </html>
