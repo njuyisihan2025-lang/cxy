@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>锂电储能AI研究分析台 Demo</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'PingFang SC','Microsoft YaHei',Arial,sans-serif;background:#f8fafc;color:#0f172a}
+.app{display:flex;min-height:100vh}.sidebar{width:270px;background:#fff;border-right:1px solid #e2e8f0;padding:20px;position:sticky;top:0;height:100vh;overflow:auto}
+.brand{background:linear-gradient(135deg,#0f172a,#1e293b);color:#fff;border-radius:20px;padding:18px;margin-bottom:18px}.brand h1{margin:0;font-size:20px}.brand p{margin:8px 0 0;color:#cbd5e1;font-size:12px;line-height:1.6}
+.nav button{width:100%;text-align:left;border:0;background:transparent;padding:13px 14px;border-radius:14px;cursor:pointer;font-size:14px;margin-bottom:8px;color:#334155}.nav button.active{background:#0f172a;color:#fff}.nav button:hover{background:#f1f5f9}.nav button.active:hover{background:#0f172a}
+.side-note{margin-top:18px;background:#0f172a;color:#fff;border-radius:18px;padding:16px}.side-note .label{font-size:12px;color:#cbd5e1}.side-note .body{margin-top:8px;line-height:1.7;font-size:14px}
+.main{flex:1;padding:22px}.topbar{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;background:#fff;border:1px solid #e2e8f0;border-radius:22px;padding:18px 22px;margin-bottom:18px}
+.title{font-size:28px;font-weight:800;margin:0}.subtitle{font-size:14px;color:#64748b;margin-top:6px}.btn{border:0;background:#0f172a;color:#fff;border-radius:14px;padding:12px 16px;cursor:pointer;font-weight:700}.btn.secondary{background:#fff;color:#0f172a;border:1px solid #e2e8f0}
+.hero{background:linear-gradient(135deg,#0f172a,#1e293b);color:#fff;border-radius:24px;padding:26px;display:grid;grid-template-columns:1.45fr 1fr;gap:18px;margin-bottom:22px}.hero h2{font-size:34px;margin:10px 0 12px}.hero p{color:#cbd5e1;line-height:1.8;margin:0}
+.pill{display:inline-block;padding:6px 10px;border-radius:999px;background:rgba(255,255,255,.1);color:#fff;font-size:12px}.hero-box{border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);border-radius:18px;padding:14px;margin-bottom:10px}.hero-box .k{font-size:12px;color:#cbd5e1}.hero-box .v{margin-top:8px;line-height:1.7;font-size:14px}
+.section-title{display:flex;justify-content:space-between;align-items:end;margin:18px 0 12px;gap:12px}.section-title h3{margin:0;font-size:22px}.section-title p{margin:6px 0 0;font-size:14px;color:#64748b}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}.two-col{display:grid;grid-template-columns:1.55fr .95fr;gap:18px}
+.card{background:#fff;border:1px solid #e2e8f0;border-radius:22px;padding:18px;box-shadow:0 1px 2px rgba(15,23,42,.03)}.kpi .label{font-size:13px;color:#64748b}.kpi .value{font-size:31px;font-weight:800;margin-top:10px}.kpi .hint{font-size:12px;color:#64748b;margin-top:8px}
+.badge{display:inline-block;font-size:12px;padding:6px 10px;border-radius:999px;background:#f1f5f9;color:#334155;margin-right:8px;margin-bottom:8px}.badge.green{background:#dcfce7;color:#166534}.badge.red{background:#fee2e2;color:#991b1b}.badge.orange{background:#ffedd5;color:#9a3412}
+.event{background:#fff;border:1px solid #e2e8f0;border-radius:20px;padding:16px;margin-bottom:12px}.event h4{margin:8px 0;font-size:18px}.muted{color:#64748b}.body-text{line-height:1.75;color:#475569;font-size:14px}
+.chain{margin-top:10px;line-height:2;font-size:14px}.step{display:inline-block;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:8px 10px;margin:4px 6px 4px 0}.step.up{border-color:#c7d2fe;background:#eef2ff}.step.mid{border-color:#dbeafe;background:#eff6ff}.step.down{border-color:#dcfce7;background:#f0fdf4}.step.warn{border-color:#fecaca;background:#fef2f2}
+.flow-col .block{border:1px solid #e2e8f0;border-radius:18px;background:#fff;padding:16px;margin-bottom:12px}.flow-col .block h4{margin:0 0 8px}
+.mini-table{width:100%;border-collapse:collapse;font-size:14px}.mini-table th,.mini-table td{padding:11px 10px;border-bottom:1px solid #e2e8f0;text-align:left}.mini-table th{background:#f8fafc;color:#64748b;font-weight:600}
+.metric{border:1px solid #e2e8f0;border-radius:16px;padding:14px;background:#fff}.metric .name{font-size:13px;color:#64748b}.metric .num{margin-top:8px;font-weight:800;font-size:24px}
+.row{display:flex;gap:8px;flex-wrap:wrap}.region-card{border:1px solid #e2e8f0;border-radius:18px;padding:14px;background:#fff}.region-card .title{font-size:16px}.bar{margin-top:8px;height:10px;background:#e2e8f0;border-radius:999px;overflow:hidden}.bar>span{display:block;height:100%;border-radius:999px}
+.company-card{border:1px solid #e2e8f0;border-radius:18px;padding:16px;background:#fff}.page{display:none}.page.active{display:block}.notice{background:#f8fafc;border:1px dashed #cbd5e1;border-radius:16px;padding:14px;font-size:14px;color:#475569;line-height:1.8}.footer-cta{margin-top:20px;background:#0f172a;color:#fff;border-radius:20px;padding:18px}
+@media (max-width:1180px){.sidebar{display:none}.main{padding:14px}.grid-4,.grid-3,.grid-2,.two-col,.hero{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar">
+<div class="brand"><h1>锂电储能AI研究分析台</h1><p>Demo for GitHub Pages<br>单文件版本，适合零基础直接发布</p></div>
+<div class="nav">
+<button class="active" data-page="home">1. 行业热点总览</button>
+<button data-page="map">2. 行业分析图谱</button>
+<button data-page="company">3. 公司研究</button>
+<button data-page="guide">发布说明</button>
+</div>
+<div class="side-note"><div class="label">AI 今日摘要</div><div class="body">当前最值得关注的边际变化有两条：一是上游成本波动是否继续向中游利润传导；二是区域政策是否真正改善项目 IRR，从而带来有效需求释放。</div></div>
+</aside>
+<main class="main">
+<div class="topbar">
+<div><h1 class="title">锂电储能 AI 研究分析台｜Demo</h1><div class="subtitle">围绕“上游成本—中游供需—下游需求”的研究框架搭建</div></div>
+<div class="row"><button class="btn">生成行业日报</button><button class="btn secondary">导出演示截图</button></div>
+</div>
+
+<section id="home" class="page active">
+<div class="hero">
+<div>
+<span class="pill">演示首页 / 首页看边际变化</span>
+<h2>行业热点总览</h2>
+<p>首页聚焦“最新的、最重要的、会改变景气判断的边际变化”。系统自动提取热点事件、关键指标异动、重点主体动态，并按照研究框架生成标准化传导路径。</p>
+<div class="row" style="margin-top:16px;"><button class="btn">进入事件分析</button><button class="btn secondary">查看重点指标</button></div>
+</div>
+<div>
+<div class="hero-box"><div class="k">今日核心矛盾</div><div class="v">上游成本扰动是否会继续压缩中游利润，以及下游区域政策能否支撑新增需求。</div></div>
+<div class="hero-box"><div class="k">AI 今日建议</div><div class="v">优先跟踪碳酸锂、电芯排产、系统中标价格、重点区域峰谷价差与容量补偿。</div></div>
+<div class="hero-box"><div class="k">重点主体</div><div class="v">阳光电源、亿纬锂能、科华数据、海博思创、重点省级能源主管部门。</div></div>
+</div>
+</div>
+
+<div class="section-title"><div><h3>核心跟踪指标异动</h3><p>把上中下游的关键边际变化放在同一页看</p></div></div>
+<div class="grid-4">
+<div class="card kpi"><div class="label">碳酸锂价格</div><div class="value">+8%</div><div class="hint">上周环比，触发上游成本扰动预警</div></div>
+<div class="card kpi"><div class="label">储能电芯排产</div><div class="value">142 GWh</div><div class="hint">月度排产，较前期继续上修</div></div>
+<div class="card kpi"><div class="label">系统中标均价</div><div class="value">0.71 元/Wh</div><div class="hint">继续下探，价格竞争仍在</div></div>
+<div class="card kpi"><div class="label">重点区域 IRR</div><div class="value">8%~11%</div><div class="hint">工商业储能区域盈利性改善</div></div>
+</div>
+
+<div class="section-title"><div><h3>热点事件与影响分析</h3><p>系统自动按标准化链路标注对价格、成本、供需、盈利的影响</p></div></div>
+<div class="event">
+<div><span class="badge orange">上游</span><span class="badge">价格事件</span><span class="badge red">高优先级</span></div>
+<h4>碳酸锂价格单周上涨 8%</h4>
+<div class="body-text">AI 归因：上游成本扰动增强。若下游需求不足以支撑价格传导，则中游利润可能继续承压。</div>
+<div class="chain"><span class="step up">上游原材料上涨</span><span class="step mid">电芯成本上升</span><span class="step mid">系统成本抬升</span><span class="step warn">若需求弱：中游利润被挤压</span><span class="step warn">行业供给可能收缩</span></div>
+<div style="margin-top:10px;"><span class="badge red">成本：负面</span><span class="badge red">盈利：负面</span><span class="badge orange">供给：偏收缩</span></div>
+</div>
+<div class="event">
+<div><span class="badge green">下游</span><span class="badge">政策事件</span><span class="badge">区域驱动</span></div>
+<h4>某省出台工商业储能容量补偿政策</h4>
+<div class="body-text">AI 归因：项目收益机制改善，若政策执行力度强，则区域需求与项目招标有望边际抬升。</div>
+<div class="chain"><span class="step down">容量补偿落地</span><span class="step down">项目 IRR 提升</span><span class="step down">投资意愿增强</span><span class="step mid">订单增加 / 中标放量</span><span class="step mid">中游景气改善</span></div>
+<div style="margin-top:10px;"><span class="badge green">需求：正面</span><span class="badge green">供需平衡：改善</span><span class="badge green">盈利：正面</span></div>
+</div>
+
+<div class="two-col">
+<div class="card">
+<div class="section-title" style="margin-top:0;"><div><h3 style="font-size:18px;">重点主体最新动态</h3><p>公司、政策发布主体、重点业主一并跟踪</p></div></div>
+<table class="mini-table">
+<tr><th>主体</th><th>最新动态</th><th>所属环节</th></tr>
+<tr><td>阳光电源</td><td>海外大储项目签约提升</td><td>中游 / 系统</td></tr>
+<tr><td>亿纬锂能</td><td>储能电芯排产继续上修</td><td>中游 / 电芯</td></tr>
+<tr><td>某省能源主管部门</td><td>容量补偿细则落地</td><td>下游 / 政策</td></tr>
+<tr><td>海博思创</td><td>EPC 项目中标价格边际承压</td><td>中游 / 集成</td></tr>
+</table>
+</div>
+<div class="card">
+<div class="section-title" style="margin-top:0;"><div><h3 style="font-size:18px;">AI 事件结论</h3><p>给研究员的可执行判断</p></div></div>
+<div class="notice">目前行业边际变化呈现“上游成本扰动 + 下游政策改善并存”的状态。中游真正的景气方向，取决于下游需求释放速度能否快于供给扩张速度。</div>
+<div class="row" style="margin-top:12px;"><span class="badge">建议写点评：是</span><span class="badge">主线：中游供需</span><span class="badge">重点公司：系统/PCS</span></div>
+</div>
+</div>
+</section>
+
+<section id="map" class="page">
+<div class="section-title"><div><h3>行业分析图谱</h3><p>按“上游成本—中游供需—下游需求”展示基本面分析框架和核心模型</p></div></div>
+<div class="flow-col">
+<div class="block">
+<h4>上游：高频指标 + 利润分布模型 + 扩产周期模型</h4>
+<div class="grid-4">
+<div class="metric"><div class="name">碳酸锂</div><div class="num">10.6 万/吨</div><div class="muted">周环比 +8%</div></div>
+<div class="metric"><div class="name">电解液价格</div><div class="num">3.2 万/吨</div><div class="muted">平稳</div></div>
+<div class="metric"><div class="name">正极利润</div><div class="num">修复中</div><div class="muted">利润向材料端回流</div></div>
+<div class="metric"><div class="name">隔膜开工率</div><div class="num">78%</div><div class="muted">边际回升</div></div>
+</div>
+<div class="grid-2" style="margin-top:14px;">
+<div class="card" style="padding:14px;"><strong>产业链利润分布模型</strong><div class="body-text" style="margin-top:8px;">通过上游价格、电芯价格、系统价格，拆分各环节单位利润与利润占比，跟踪利润在上游材料与中游制造之间的迁移。</div><div class="chain"><span class="step up">材料价格</span><span class="step up">加工费</span><span class="step mid">电芯价格</span><span class="step mid">系统价格</span><span class="step">利润分布</span></div></div>
+<div class="card" style="padding:14px;"><strong>扩产周期测算模型</strong><div class="body-text" style="margin-top:8px;">根据立项、建设、设备、调试、爬坡周期，估算各材料新增有效供给释放时间，用于判断未来 6-12 个月供给压力。</div><div class="chain"><span class="step up">立项</span><span class="step up">建设</span><span class="step up">调试</span><span class="step up">爬坡</span><span class="step">有效供给</span></div></div>
+</div>
+</div>
+<div class="block">
+<h4>中游：排产 / 产量 / 出货量 / 中标价格 + 储能供需平衡模型</h4>
+<div class="grid-4">
+<div class="metric"><div class="name">储能电芯排产</div><div class="num">142 GWh</div><div class="muted">月度上修</div></div>
+<div class="metric"><div class="name">储能系统中标</div><div class="num">9.0 GWh</div><div class="muted">需求放量</div></div>
+<div class="metric"><div class="name">系统中标价格</div><div class="num">0.71 元/Wh</div><div class="muted">继续承压</div></div>
+<div class="metric"><div class="name">EPC 价格</div><div class="num">0.95 元/Wh</div><div class="muted">边际下行</div></div>
+</div>
+<div class="grid-2" style="margin-top:14px;">
+<div class="card" style="padding:14px;"><strong>储能供需平衡模型</strong><div class="body-text" style="margin-top:8px;">供给端接入排产、产量、库存、产能利用率；需求端接入大储、工商业、户储与海外需求预测，量化供需缺口和景气度。</div><div class="chain"><span class="step mid">排产</span><span class="step mid">产量</span><span class="step down">需求预测</span><span class="step">供需缺口</span><span class="step">景气度评分</span></div></div>
+<div class="card" style="padding:14px;"><strong>AI 判断</strong><div class="body-text" style="margin-top:8px;">当前中游呈现“订单改善但价格仍承压”的特征，是否真正进入景气修复期，需要继续观察下游需求释放能否快于供给扩张。</div><div style="margin-top:10px;"><span class="badge">供需状态：紧平衡偏过剩</span><span class="badge">价格压力：偏高</span><span class="badge">景气度：修复早期</span></div></div>
+</div>
+</div>
+<div class="block">
+<h4>下游：分区域需求、IRR、政策地图 + 需求测算模型</h4>
+<div class="grid-3">
+<div class="region-card"><div class="title">江苏</div><div class="muted">工商业储能 / 峰谷价差高 / 容量补偿改善</div><div style="margin-top:8px;">需求热度</div><div class="bar"><span style="width:88%;background:#16a34a;"></span></div><div style="margin-top:8px;">项目 IRR：<strong>10.8%</strong></div></div>
+<div class="region-card"><div class="title">广东</div><div class="muted">辅助服务活跃 / 峰谷价差较高</div><div style="margin-top:8px;">需求热度</div><div class="bar"><span style="width:82%;background:#2563eb;"></span></div><div style="margin-top:8px;">项目 IRR：<strong>9.6%</strong></div></div>
+<div class="region-card"><div class="title">山东</div><div class="muted">电网侧需求强 / 容量机制待跟踪</div><div style="margin-top:8px;">需求热度</div><div class="bar"><span style="width:71%;background:#7c3aed;"></span></div><div style="margin-top:8px;">项目 IRR：<strong>8.3%</strong></div></div>
+</div>
+<div class="grid-2" style="margin-top:14px;">
+<div class="card" style="padding:14px;"><strong>需求测算模型</strong><div class="body-text" style="margin-top:8px;">输入区域峰谷价差、负荷结构、新能源装机比例、政策强度，输出各区域储能需求空间和分场景需求占比。</div></div>
+<div class="card" style="padding:14px;"><strong>IRR 测算模型</strong><div class="body-text" style="margin-top:8px;">输入系统成本、峰谷价差、利用小时数、融资成本、辅助服务与容量补偿，输出 IRR、回收期和盈亏平衡点。</div></div>
+</div>
+</div>
+</div>
+<div class="footer-cta"><strong>图谱页总结：</strong> 上游看成本与利润分布，中游看供需平衡和价格，下游看区域需求与 IRR；三者共同决定行业景气方向。</div>
+</section>
+
+<section id="company" class="page">
+<div class="section-title"><div><h3>公司研究</h3><p>按分析框架的环节分类公司，展示竞争格局、可比公司池，并提供跳转入口</p></div></div>
+<div class="grid-3">
+<div class="company-card"><h4>上游材料</h4><div class="muted">碳酸锂 / 正极 / 电解液 / 隔膜</div><div style="margin-top:10px;"><span class="badge">市占率看板</span><span class="badge">利润分布</span></div><div class="body-text" style="margin-top:10px;">重点看原材料价格、单位利润、扩产周期与行业集中度。</div></div>
+<div class="company-card"><h4>中游电芯 / PCS / 系统</h4><div class="muted">储能电芯 / PCS / 系统集成 / EPC</div><div style="margin-top:10px;"><span class="badge">CR3 / CR5</span><span class="badge">排产份额</span></div><div class="body-text" style="margin-top:10px;">重点看排产、订单、市占率变化和国内外盈利分化。</div></div>
+<div class="company-card"><h4>下游运营与应用</h4><div class="muted">储能运营 / 业主 / 区域开发商</div><div style="margin-top:10px;"><span class="badge">区域布局</span><span class="badge">项目资源</span></div><div class="body-text" style="margin-top:10px;">重点看项目资源、区域政策敏感度和 IRR 改善弹性。</div></div>
+</div>
+<div class="two-col" style="margin-top:14px;">
+<div class="card">
+<h4 style="margin-top:0;">竞争格局与市占率</h4>
+<table class="mini-table">
+<tr><th>环节</th><th>龙头公司</th><th>参考市占率</th><th>可比公司池</th></tr>
+<tr><td>储能电芯</td><td>亿纬锂能</td><td>18%</td><td>鹏辉能源、国轩高科、瑞浦兰钧</td></tr>
+<tr><td>PCS</td><td>阳光电源</td><td>32%</td><td>科华数据、上能电气</td></tr>
+<tr><td>系统集成</td><td>海博思创</td><td>14%</td><td>科陆电子、南都电源</td></tr>
+</table>
+</div>
+<div class="card">
+<h4 style="margin-top:0;">公司研究入口</h4>
+<div class="notice">行业台负责筛选和定位：公司处在哪个环节、景气与风险如何、可比对象是谁。<br><br>公司台负责深挖：财报拆解、订单跟踪、估值测算、公告纪要解读。</div>
+<div class="row" style="margin-top:12px;"><button class="btn">跳转：阳光电源研究页</button><button class="btn secondary">跳转：亿纬锂能研究页</button></div>
+</div>
+</div>
+</section>
+
+<section id="guide" class="page">
+<div class="section-title"><div><h3>这份 demo 怎么发布到 GitHub</h3><p>你不用学代码，只需要把这个文件上传到仓库并打开 GitHub Pages</p></div></div>
+<div class="card"><ol class="body-text" style="margin:0;padding-left:22px;"><li>把这个文件命名成 <strong>index.html</strong></li><li>上传到你的 GitHub 仓库根目录</li><li>进入 <strong>Settings → Pages</strong></li><li>选择 <strong>Deploy from a branch</strong></li><li>分支选 <strong>main</strong>，目录选 <strong>/ (root)</strong></li><li>保存后，GitHub 会给你一个公开网址</li></ol></div>
+</section>
+</main>
+</div>
+<script>
+const buttons=document.querySelectorAll('.nav button');
+const pages=document.querySelectorAll('.page');
+buttons.forEach(btn=>{btn.addEventListener('click',()=>{buttons.forEach(b=>b.classList.remove('active'));pages.forEach(p=>p.classList.remove('active'));btn.classList.add('active');document.getElementById(btn.dataset.page).classList.add('active');});});
+</script>
+</body>
+</html>
